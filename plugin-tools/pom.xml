@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.tranto</groupId>
+        <artifactId>tranto</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!--
+      The "tools" plugin pack: ten self-contained, local-first tasks (hashing, encoding, JSON, CSV,
+      text, files, dates) with no external services required — everything runs on the JDK (plus
+      Jackson for JSON, which the engine already ships). Like every plugin it compiles against the
+      SDK only (scope 'provided') so it cannot see the engine, and the Tranto annotation processor
+      writes its ServiceLoader manifest so the engine discovers it at runtime.
+    -->
+    <artifactId>tranto-plugin-tools</artifactId>
+    <name>Tranto :: Plugin Tools (local-first utility tasks)</name>
+
+    <dependencies>
+        <!-- The only compile dependency a plugin needs: the semver-stable SDK. -->
+        <dependency>
+            <groupId>io.tranto</groupId>
+            <artifactId>tranto-plugin-sdk</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- JSON parsing/serialization. Version is managed by the Spring Boot BOM (root pom) and
+             the same Jackson build already ships in the engine runtime, so no version skew. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Test-only: spin up the real engine to prove each plugin runs end-to-end. -->
+        <dependency>
+            <groupId>io.tranto</groupId>
+            <artifactId>tranto-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.tranto</groupId>
+            <artifactId>tranto-plugin-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Run Lombok + the Tranto plugin processor (writes META-INF/services). -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths combine.self="override">
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>io.tranto</groupId>
+                            <artifactId>tranto-processor</artifactId>
+                            <version>${project.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

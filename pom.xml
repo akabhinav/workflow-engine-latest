@@ -26,6 +26,7 @@
         <module>plugin-core</module>
         <module>plugin-scripts</module>
         <module>plugin-aws</module>
+        <module>plugin-tools</module>
         <module>plugin-example</module>
         <module>webserver</module>
         <module>cli</module>
@@ -121,6 +122,11 @@
             <dependency>
                 <groupId>io.tranto</groupId>
                 <artifactId>tranto-plugin-aws</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.tranto</groupId>
+                <artifactId>tranto-plugin-tools</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

@@ -11,6 +11,7 @@ import io.tranto.core.runners.StandaloneEngine;
 import io.tranto.core.serializers.JacksonMapper;
 import io.tranto.core.serializers.YamlFlowParser;
 import io.tranto.plugin.core.CorePlugins;
+import io.tranto.plugin.tools.ToolPlugins;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -58,6 +59,8 @@ public class RunCommand implements Callable<Integer> {
 
         // Built-in plugins.
         CorePlugins.all().forEach(registry::register);
+        // Local-first utility tasks (hashing, encoding, JSON, CSV, text, files, dates).
+        ToolPlugins.all().forEach(registry::register);
 
         // External plugin JARs (isolated classloader + ServiceLoader discovery).
         int external = 0;

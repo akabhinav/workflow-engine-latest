@@ -1,0 +1,85 @@
+# Demonstrates the local-first "tools" plugin pack. Run with:
+#   java -jar cli/target/tranto.jar run examples/tools-demo.yaml -i name=Ada
+# All tasks run on the JDK alone — no external services required.
+id: tools_demo
+namespace: dev
+
+inputs:
+  - id: name
+    type: STRING
+    defaults: world
+
+tasks:
+  # 1. Hash a value into a hex digest (default SHA-256).
+  - id: checksum
+    type: io.tranto.plugin.tools.crypto.Hash
+    from: "hello {{ inputs.name }}"
+
+  # 2. Base64-encode, then 3. decode back — a round trip.
+  - id: encode
+    type: io.tranto.plugin.tools.encoding.Base64Encode
+    from: "hello {{ inputs.name }}"
+  - id: decode
+    type: io.tranto.plugin.tools.encoding.Base64Decode
+    from: "{{ outputs.encode.encoded }}"
+
+  # 4. Parse a JSON string into structured data and read a field.
+  - id: parse
+    type: io.tranto.plugin.tools.json.Parse
+    from: '{"user":{"name":"{{ inputs.name }}"},"tags":["a","b","c"]}'
+
+  # 5. Parse CSV text into header-keyed rows.
+  - id: csv
+    type: io.tranto.plugin.tools.csv.Read
+    from: |
+      city,country
+      London,UK
+      Paris,France
+
+  # 6. Extract matches with a regex.
+  - id: ids
+    type: io.tranto.plugin.tools.text.RegexExtract
+    from: "order-123, order-456, order-789"
+    pattern: "order-(\\d+)"
+
+  # 7. Regex replace (mask everything but the last group).
+  - id: masked
+    type: io.tranto.plugin.tools.text.Replace
+    from: "token=abcdef123456"
+    pattern: "token=(\\w+)"
+    replacement: "token=***"
+
+  # 8. Write a rendered report to a local file, then 9. read it back.
+  - id: write
+    type: io.tranto.plugin.tools.file.Write
+    path: "/tmp/tranto-tools/{{ execution.id }}.txt"
+    content: |
+      name    : {{ inputs.name }}
+      checksum: {{ outputs.checksum.digest }}
+      user    : {{ outputs.parse.value.user.name }}
+      cities  : {{ outputs.csv.count }}
+      first id: {{ outputs.ids.groups[1] }}
+  - id: read
+    type: io.tranto.plugin.tools.file.Read
+    path: "{{ outputs.write.path }}"
+
+  # 10. Parse, shift and format a date-time.
+  - id: tomorrow
+    type: io.tranto.plugin.tools.datetime.Format
+    from: "2026-01-01T00:00:00Z"
+    offset: "P1D"
+    zone: "UTC"
+    format: "yyyy-MM-dd"
+
+  # Surface the interesting values in the execution outputs.
+  - id: summary
+    type: io.tranto.plugin.core.output.OutputValues
+    values:
+      checksum: "{{ outputs.checksum.digest }}"
+      decoded: "{{ outputs.decode.decoded }}"
+      user: "{{ outputs.parse.value.user.name }}"
+      firstCity: "{{ outputs.csv.rows[0].city }}"
+      firstOrderId: "{{ outputs.ids.groups[1] }}"
+      masked: "{{ outputs.masked.result }}"
+      report: "{{ outputs.read.content }}"
+      tomorrow: "{{ outputs.tomorrow.formatted }}"

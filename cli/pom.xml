@@ -37,6 +37,10 @@
             <groupId>io.tranto</groupId>
             <artifactId>tranto-plugin-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.tranto</groupId>
+            <artifactId>tranto-plugin-tools</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
