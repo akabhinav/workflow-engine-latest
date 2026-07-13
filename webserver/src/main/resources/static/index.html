@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tranto Console</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%2334e0c4'/></svg>">
+</head>
+<body>
+    <!-- left rail -->
+    <nav class="rail">
+        <div class="logo" title="Tranto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#06231d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 7h16M12 7v13M7 20h10"/>
+            </svg>
+        </div>
+        <button class="rail-btn active" id="nav-editor" title="Editor">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+        <button class="rail-btn" id="nav-runs" title="Executions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </button>
+        <div class="rail-spacer"></div>
+    </nav>
+
+    <!-- header -->
+    <header>
+        <div class="brand">
+            <b>TRANTO</b>
+            <span>workflow console</span>
+        </div>
+        <div class="pills">
+            <div class="pill"><span class="dot" id="health-dot"></span><span class="k">engine</span><span class="v" id="health-state">…</span></div>
+            <div class="pill"><span class="k">flows</span><span class="v" id="stat-flows">0</span></div>
+            <div class="pill"><span class="k">runs</span><span class="v" id="stat-execs">0</span></div>
+            <div class="pill"><span class="k">success</span><span class="v ok" id="stat-success">0</span></div>
+            <div class="pill"><span class="k">failed</span><span class="v err" id="stat-failed">0</span></div>
+        </div>
+    </header>
+
+    <!-- main -->
+    <main>
+        <!-- LEFT: editor view -->
+        <section class="panel left" id="view-editor">
+            <div class="section-title">Flow library</div>
+            <div class="library" id="library"></div>
+
+            <div class="section-title">Definition</div>
+            <div class="editor-wrap">
+                <div class="editor-head">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>
+                    <span class="fname" id="fname">flow.yaml</span>
+                </div>
+                <div class="editor-body">
+                    <div class="gutter" id="gutter">1</div>
+                    <textarea id="yaml" spellcheck="false" wrap="off"></textarea>
+                </div>
+            </div>
+            <div class="toolbar">
+                <button class="btn" id="btn-deploy">Deploy</button>
+                <button class="btn primary" id="btn-run">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    Run
+                </button>
+                <span class="toast" id="toast"></span>
+            </div>
+        </section>
+
+        <!-- LEFT alt: runs view -->
+        <section class="panel left hidden" id="view-runs">
+            <div class="section-title">Recent executions</div>
+            <div id="runs-list"></div>
+        </section>
+
+        <!-- RIGHT: live execution -->
+        <section class="panel right">
+            <div id="exec-empty" class="empty">
+                <div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z"/></svg>
+                    <div><b>Run a flow to watch it live</b></div>
+                    <div style="font-size:12px;margin-top:6px">Pick a flow on the left and press Run. Tasks light up as the engine streams state over SSE.</div>
+                </div>
+            </div>
+
+            <div id="exec-view" class="hidden">
+                <div class="exec-head">
+                    <h2 id="exec-flow">—</h2>
+                    <span class="badge" id="exec-badge" data-s="">—</span>
+                    <span class="exec-id" id="exec-id"></span>
+                    <span class="elapsed" id="exec-elapsed">0.0s</span>
+                </div>
+
+                <div class="section-title">Topology</div>
+                <div class="graph-wrap">
+                    <svg id="connectors"></svg>
+                    <div class="nodes" id="nodes"></div>
+                </div>
+
+                <div class="section-title">Task timeline</div>
+                <div class="timeline" id="timeline"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
