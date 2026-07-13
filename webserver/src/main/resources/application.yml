@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: tranto-webserver
+  main:
+    banner-mode: "off"
+  threads:
+    virtual:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    io.tranto: INFO

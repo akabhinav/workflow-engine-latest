@@ -1,0 +1,7 @@
+id: notify_child
+namespace: shop
+description: Child flow invoked by 01-order-fraud-screening (register it with --register).
+tasks:
+  - id: notify
+    type: io.tranto.plugin.core.log.Log
+    message: "notifications dispatched"

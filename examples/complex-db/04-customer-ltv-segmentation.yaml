@@ -1,0 +1,33 @@
+id: ltv_segmentation
+namespace: crm
+description: Compute customer lifetime value and segment into GOLD/SILVER/BRONZE tiers. Self-verifying.
+inputs:
+  - id: dbUrl
+    type: STRING
+    defaults: "jdbc:h2:mem:ltv_demo;DB_CLOSE_DELAY=-1"
+tasks:
+  - id: setup
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: |
+      CREATE TABLE orders(customer_id INT, amount INT);
+      CREATE TABLE ltv(customer_id INT, total INT, tier VARCHAR(10));
+      INSERT INTO orders VALUES (1,100),(1,200),(2,1500),(3,50)
+  - id: segment
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: |
+      INSERT INTO ltv
+      SELECT customer_id, SUM(amount),
+        CASE WHEN SUM(amount) >= 1000 THEN 'GOLD'
+             WHEN SUM(amount) >= 250  THEN 'SILVER'
+             ELSE 'BRONZE' END
+      FROM orders GROUP BY customer_id
+  - id: gold
+    type: io.tranto.plugin.core.jdbc.Query
+    url: "{{ inputs.dbUrl }}"
+    sql: "SELECT COUNT(*) FROM ltv WHERE tier='GOLD'"
+  - id: verify
+    type: io.tranto.plugin.core.execution.Assert
+    conditions:
+      - "{{ outputs.gold.firstValue == 1 }}"

@@ -1,0 +1,35 @@
+id: inventory_recon
+namespace: ops
+description: Reconcile on-hand vs ledger; flag oversold SKUs. Self-verifying.
+inputs:
+  - id: dbUrl
+    type: STRING
+    defaults: "jdbc:h2:mem:inv_demo;DB_CLOSE_DELAY=-1"
+tasks:
+  - id: setup
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: |
+      CREATE TABLE inventory(sku VARCHAR(5) PRIMARY KEY, on_hand INT);
+      CREATE TABLE ledger(sku VARCHAR(5), delta INT);
+      CREATE TABLE discrepancies(sku VARCHAR(5), computed INT);
+      INSERT INTO inventory VALUES ('A',100),('B',50),('C',5);
+      INSERT INTO ledger VALUES ('A',-30),('B',-5),('C',-20),('C',-3)
+  - id: reconcile
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: |
+      INSERT INTO discrepancies
+      SELECT sku, computed FROM (
+        SELECT i.sku AS sku, i.on_hand + COALESCE(SUM(l.delta),0) AS computed
+        FROM inventory i LEFT JOIN ledger l ON i.sku = l.sku
+        GROUP BY i.sku, i.on_hand
+      ) x WHERE computed < 0
+  - id: count
+    type: io.tranto.plugin.core.jdbc.Query
+    url: "{{ inputs.dbUrl }}"
+    sql: "SELECT COUNT(*) FROM discrepancies"
+  - id: verify
+    type: io.tranto.plugin.core.execution.Assert
+    conditions:
+      - "{{ outputs.count.firstValue == 1 }}"

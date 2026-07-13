@@ -1,0 +1,17 @@
+id: monthly_report
+namespace: finance
+description: Typed inputs with defaults + coercion (year is INT; pass year=2026 or use the default).
+inputs:
+  - id: month
+    type: STRING
+    defaults: January
+  - id: year
+    type: INT
+    defaults: 2026
+  - id: verbose
+    type: BOOLEAN
+    defaults: false
+tasks:
+  - id: build
+    type: io.tranto.plugin.core.log.Log
+    message: "report for {{ inputs.month }} {{ inputs.year }} (verbose={{ inputs.verbose }})"

@@ -1,0 +1,10 @@
+id: ci_build
+namespace: cicd
+description: Run real shell commands through the Process task runner (fails on the first non-zero exit).
+tasks:
+  - id: build
+    type: io.tranto.plugin.core.script.Commands
+    commands:
+      - echo compiling sources
+      - echo running tests
+      - echo BUILD OK

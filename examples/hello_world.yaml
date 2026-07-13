@@ -1,0 +1,11 @@
+id: hello_world
+namespace: dev
+description: The canonical first flow — logs a message and returns a value.
+tasks:
+  - id: say_hello
+    type: io.tranto.plugin.core.log.Log
+    message: "Hello, World from Tranto!"
+
+  - id: produce_value
+    type: io.tranto.plugin.core.debug.Return
+    format: "the answer is 42"

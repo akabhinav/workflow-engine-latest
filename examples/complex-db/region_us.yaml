@@ -1,0 +1,8 @@
+id: region_us
+namespace: regions
+description: Processes the US slice; called as a subflow by 10-partitioned-fanout.
+tasks:
+  - id: process
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "jdbc:h2:mem:fanout_demo;DB_CLOSE_DELAY=-1"
+    sql: "UPDATE orders SET processed=TRUE WHERE region='US'"

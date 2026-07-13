@@ -1,0 +1,17 @@
+id: resilient_job
+namespace: ops
+description: >
+  The main task fails, but the error handler and the finally block still run. Execution ends FAILED
+  (the main outcome dominates) while the handlers do their cleanup/alerting.
+tasks:
+  - id: main
+    type: io.tranto.plugin.core.execution.Fail
+    message: "disk full"
+errors:
+  - id: alert
+    type: io.tranto.plugin.core.log.Log
+    message: "paging on-call"
+finally:
+  - id: release_lock
+    type: io.tranto.plugin.core.log.Log
+    message: "lock released"

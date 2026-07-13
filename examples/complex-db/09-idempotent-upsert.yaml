@@ -1,0 +1,32 @@
+id: idempotent_upsert
+namespace: data
+description: Run a MERGE upsert twice (with retry on the first); row count stays stable, value updates.
+inputs:
+  - id: dbUrl
+    type: STRING
+    defaults: "jdbc:h2:mem:upsert_demo;DB_CLOSE_DELAY=-1"
+tasks:
+  - id: setup
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: "CREATE TABLE targets(id INT PRIMARY KEY, name VARCHAR(20))"
+  - id: upsert_first
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: "MERGE INTO targets(id,name) KEY(id) VALUES (1,'v1'),(2,'v2')"
+    retry:
+      maxAttempts: 3
+      behavior: EXPONENTIAL
+      delay: "PT0.05S"
+  - id: upsert_again
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: "MERGE INTO targets(id,name) KEY(id) VALUES (1,'v1-updated'),(2,'v2')"
+  - id: count
+    type: io.tranto.plugin.core.jdbc.Query
+    url: "{{ inputs.dbUrl }}"
+    sql: "SELECT COUNT(*) FROM targets"
+  - id: verify
+    type: io.tranto.plugin.core.execution.Assert
+    conditions:
+      - "{{ outputs.count.firstValue == 2 }}"

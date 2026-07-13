@@ -1,0 +1,10 @@
+id: build_summary
+namespace: cicd
+description: Flow outputs rendered at the end from a task's output.
+outputs:
+  - id: artifact
+    value: "{{ outputs.compile.value }}"
+tasks:
+  - id: compile
+    type: io.tranto.plugin.core.debug.Return
+    format: "app-1.4.2.jar"

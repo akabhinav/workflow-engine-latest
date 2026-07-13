@@ -1,0 +1,15 @@
+id: data_quality_gate
+namespace: data
+description: Assert invariants before publishing. Fails the run if any condition is not true.
+inputs:
+  - id: rows
+    type: INT
+    defaults: 500
+tasks:
+  - id: check
+    type: io.tranto.plugin.core.execution.Assert
+    conditions:
+      - "{{ inputs.rows > 0 }}"
+  - id: publish
+    type: io.tranto.plugin.core.log.Log
+    message: "publishing {{ inputs.rows }} rows"

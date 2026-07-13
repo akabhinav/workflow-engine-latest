@@ -1,0 +1,13 @@
+id: etl_parent
+namespace: data
+description: >
+  Runs a child flow (enrich_child) as a subflow and mirrors its outcome. Requires enrich_child to be
+  registered first, so this one runs via the API/engine, not a single `tranto run`.
+tasks:
+  - id: call_enrich
+    type: io.tranto.plugin.core.flow.Subflow
+    namespace: data
+    flowId: enrich_child
+  - id: finish
+    type: io.tranto.plugin.core.log.Log
+    message: "pipeline done"

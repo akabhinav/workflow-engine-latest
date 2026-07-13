@@ -1,0 +1,37 @@
+# Maven build output
+target/
+*.class
+
+# Log files
+*.log
+logs/
+
+# IDE - IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# IDE - Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# IDE - VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Maven wrapper (keep .mvn/wrapper if present, ignore local)
+.mvn/timing.properties
+
+# Env / secrets
+*.env
+.env
+
+# Stray skill file
+*.skill

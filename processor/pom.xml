@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.tranto</groupId>
+        <artifactId>tranto</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!--
+      Tranto Processor — the build-time annotation processor.
+      Scans every concrete @Plugin class and generates the ServiceLoader manifest
+      (META-INF/services/io.tranto.core.models.Plugin) so plugins are discovered at runtime
+      without reflection scanning. Plugin JARs put this processor on their annotation path.
+    -->
+    <artifactId>tranto-processor</artifactId>
+    <name>Tranto :: Processor (annotation processor)</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.tranto</groupId>
+            <artifactId>tranto-model</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- This module IS an annotation processor; it must not run one on itself. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <proc>none</proc>
+                    <annotationProcessorPaths combine.self="override"/>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

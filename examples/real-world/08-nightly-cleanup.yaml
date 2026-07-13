@@ -1,0 +1,11 @@
+id: nightly_cleanup
+namespace: ops
+description: A best-effort step is allowed to fail; the execution rolls up to WARNING, not FAILED.
+tasks:
+  - id: purge_temp
+    type: io.tranto.plugin.core.execution.Fail
+    message: "temp dir locked"
+    allowFailure: true
+  - id: report
+    type: io.tranto.plugin.core.log.Log
+    message: "cleanup finished"

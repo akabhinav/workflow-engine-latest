@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.tranto</groupId>
+        <artifactId>tranto</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!--
+      A SAMPLE THIRD-PARTY PLUGIN. This is exactly how an external author packages a plugin:
+      depend on the SDK only (scope 'provided'), add the Tranto annotation processor to generate the
+      ServiceLoader manifest, and ship the jar. The engine discovers it at runtime — no engine code
+      changes. Note the com.acme.* package: this module cannot even see the engine (the stability wall).
+    -->
+    <artifactId>tranto-plugin-example</artifactId>
+    <name>Tranto :: Plugin Example (third-party sample)</name>
+
+    <dependencies>
+        <!-- The ONLY compile dependency a plugin needs: the semver-stable SDK. -->
+        <dependency>
+            <groupId>io.tranto</groupId>
+            <artifactId>tranto-plugin-sdk</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Test-only: spin up the real engine to prove the plugin runs end-to-end. -->
+        <dependency>
+            <groupId>io.tranto</groupId>
+            <artifactId>tranto-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Run Lombok + the Tranto plugin processor (writes META-INF/services). -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths combine.self="override">
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>io.tranto</groupId>
+                            <artifactId>tranto-processor</artifactId>
+                            <version>${project.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

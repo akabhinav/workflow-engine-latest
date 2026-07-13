@@ -1,0 +1,11 @@
+id: expense_approval
+namespace: finance
+description: >
+  Pauses for a human approval, then continues once resumed. The execution stops at PAUSED; call
+  resume(executionId) (engine/API) to finish it — so this one is driven programmatically, not by `tranto run`.
+tasks:
+  - id: gate
+    type: io.tranto.plugin.core.flow.Pause
+  - id: reimburse
+    type: io.tranto.plugin.core.log.Log
+    message: "reimbursement issued"

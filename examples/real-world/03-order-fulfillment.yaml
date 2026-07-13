@@ -1,0 +1,24 @@
+id: order_fulfillment
+namespace: shop
+description: Route an order by its type (switch/branch).
+inputs:
+  - id: kind
+    type: STRING
+    defaults: digital
+tasks:
+  - id: route
+    type: io.tranto.plugin.core.flow.Switch
+    value: "{{ inputs.kind }}"
+    cases:
+      physical:
+        - id: ship
+          type: io.tranto.plugin.core.log.Log
+          message: "printing shipping label"
+      digital:
+        - id: deliver
+          type: io.tranto.plugin.core.log.Log
+          message: "emailing download link"
+    defaults:
+      - id: unknown
+        type: io.tranto.plugin.core.log.Log
+        message: "manual review"

@@ -1,0 +1,82 @@
+id: fraud_pipeline
+namespace: shop
+description: >
+  Screen pending orders for fraud (set-based), fulfil the rest, audit each processing order (loop),
+  count in parallel, gate on data quality, save a KV cursor, and notify via a subflow. Self-verifying:
+  the final Assert fails the run unless the DB ended in the expected state.
+  Run: tranto run 01-order-fraud-screening.yaml --register notify_child.yaml
+inputs:
+  - id: dbUrl
+    type: STRING
+    defaults: "jdbc:h2:mem:fraud_demo;DB_CLOSE_DELAY=-1"
+outputs:
+  - id: reviewed
+    value: "{{ outputs.count_review.firstValue }}"
+  - id: processing
+    value: "{{ outputs.count_processing.firstValue }}"
+tasks:
+  - id: setup
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: |
+      CREATE TABLE customers(id INT PRIMARY KEY, name VARCHAR(50), risk INT);
+      CREATE TABLE orders(id INT PRIMARY KEY, customer_id INT, amount INT, status VARCHAR(20));
+      CREATE TABLE audit(id INT AUTO_INCREMENT PRIMARY KEY, order_id INT, action VARCHAR(20));
+      INSERT INTO customers VALUES (1,'Ada',20),(2,'Bob',85),(3,'Cid',10);
+      INSERT INTO orders VALUES (1,1,500,'PENDING'),(2,1,1500,'PENDING'),(3,2,300,'PENDING'),(4,3,200,'PENDING'),(5,3,2000,'PENDING')
+  - id: screen
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: |
+      UPDATE orders SET status='REVIEW'
+      WHERE status='PENDING' AND (amount > 1000
+        OR customer_id IN (SELECT id FROM customers WHERE risk > 70))
+  - id: process
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: "UPDATE orders SET status='PROCESSING' WHERE status='PENDING'"
+  - id: checks
+    type: io.tranto.plugin.core.flow.Parallel
+    tasks:
+      - id: count_review
+        type: io.tranto.plugin.core.jdbc.Query
+        url: "{{ inputs.dbUrl }}"
+        sql: "SELECT COUNT(*) FROM orders WHERE status='REVIEW'"
+      - id: count_processing
+        type: io.tranto.plugin.core.jdbc.Query
+        url: "{{ inputs.dbUrl }}"
+        sql: "SELECT COUNT(*) FROM orders WHERE status='PROCESSING'"
+  - id: get_ids
+    type: io.tranto.plugin.core.jdbc.Query
+    url: "{{ inputs.dbUrl }}"
+    sql: "SELECT id FROM orders WHERE status='PROCESSING' ORDER BY id"
+  - id: audit_each
+    type: io.tranto.plugin.core.flow.Loop
+    values: "{{ outputs.get_ids.firstColumn }}"
+    tasks:
+      - id: write_audit
+        type: io.tranto.plugin.core.jdbc.Execute
+        url: "{{ inputs.dbUrl }}"
+        sql: "INSERT INTO audit(order_id, action) VALUES ({{ taskrun.value }}, 'PROCESSING')"
+  - id: check_pending
+    type: io.tranto.plugin.core.jdbc.Query
+    url: "{{ inputs.dbUrl }}"
+    sql: "SELECT COUNT(*) FROM orders WHERE status='PENDING'"
+  - id: save_cursor
+    type: io.tranto.plugin.core.kv.Set
+    key: last_run
+    value: "processed {{ outputs.count_processing.firstValue }}"
+  - id: notify
+    type: io.tranto.plugin.core.flow.Subflow
+    namespace: shop
+    flowId: notify_child
+  - id: verify
+    type: io.tranto.plugin.core.execution.Assert
+    conditions:
+      - "{{ outputs.count_review.firstValue == 3 }}"
+      - "{{ outputs.count_processing.firstValue == 2 }}"
+      - "{{ outputs.check_pending.firstValue == 0 }}"
+finally:
+  - id: done
+    type: io.tranto.plugin.core.log.Log
+    message: "pipeline complete"

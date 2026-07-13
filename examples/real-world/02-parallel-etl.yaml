@@ -1,0 +1,19 @@
+id: parallel_etl
+namespace: data
+description: Extract from several sources concurrently, then load.
+tasks:
+  - id: extract
+    type: io.tranto.plugin.core.flow.Parallel
+    tasks:
+      - id: from_crm
+        type: io.tranto.plugin.core.log.Log
+        message: "pulling CRM"
+      - id: from_billing
+        type: io.tranto.plugin.core.log.Log
+        message: "pulling billing"
+      - id: from_events
+        type: io.tranto.plugin.core.log.Log
+        message: "pulling events"
+  - id: load
+    type: io.tranto.plugin.core.log.Log
+    message: "loaded warehouse"

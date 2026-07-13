@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+      Tranto — a workflow orchestration platform (a better-than-Kestra rebuild).
+      This is the root reactor: it is the PARENT of every module (build config +
+      managed dependency versions) and the AGGREGATOR (the <modules> list).
+      See docs/ for architecture. Stack: Spring Boot 3 + Java 21 + Maven.
+    -->
+    <groupId>io.tranto</groupId>
+    <artifactId>tranto</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Tranto</name>
+    <description>Declarative, event-driven workflow orchestration platform</description>
+
+    <modules>
+        <module>platform</module>
+        <module>model</module>
+        <module>plugin-sdk</module>
+        <module>processor</module>
+        <module>core</module>
+        <module>plugin-core</module>
+        <module>plugin-scripts</module>
+        <module>plugin-aws</module>
+        <module>plugin-example</module>
+        <module>webserver</module>
+        <module>cli</module>
+    </modules>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Managed externally by the Spring Boot BOM (imported below): jackson,
+             jooq, hikari, h2, postgresql, micrometer, junit, mockito, ... -->
+        <spring-boot.version>3.3.5</spring-boot.version>
+
+        <!-- Pinned here (not in the Spring Boot BOM) -->
+        <pebble.version>3.2.2</pebble.version>
+        <picocli.version>4.7.6</picocli.version>
+        <assertj.version>3.26.3</assertj.version>
+        <lombok.version>1.18.34</lombok.version>
+        <aws.sdk.version>2.47.5</aws.sdk.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Boot's curated BOM manages the versions of most libraries. -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- AWS SDK v2 BOM: manages the versions of all service clients (sns/sqs/lambda/dynamodb). -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws.sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Libraries not in the Spring Boot BOM -->
+            <dependency>
+                <groupId>io.pebbletemplates</groupId>
+                <artifactId>pebble</artifactId>
+                <version>${pebble.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli</artifactId>
+                <version>${picocli.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Tranto internal modules (single source of truth for their version) -->
+            <dependency>
+                <groupId>io.tranto</groupId>
+                <artifactId>tranto-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.tranto</groupId>
+                <artifactId>tranto-plugin-sdk</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.tranto</groupId>
+                <artifactId>tranto-processor</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.tranto</groupId>
+                <artifactId>tranto-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.tranto</groupId>
+                <artifactId>tranto-plugin-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.tranto</groupId>
+                <artifactId>tranto-plugin-scripts</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.tranto</groupId>
+                <artifactId>tranto-plugin-aws</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <release>${maven.compiler.release}</release>
+                        <parameters>true</parameters>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <!-- Java 21: tests may exercise virtual threads freely -->
+                        <argLine>-Xshare:off</argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

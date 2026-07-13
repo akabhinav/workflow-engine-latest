@@ -1,0 +1,14 @@
+id: daily_digest
+namespace: reporting
+description: >
+  Starts itself on a cron schedule (every minute here for demo; use e.g. "0 9 * * *" for 9am daily).
+  The scheduler creates an execution when due — register the flow and let the scheduler run.
+triggers:
+  - id: every_minute
+    type: io.tranto.plugin.core.trigger.Schedule
+    cron: "* * * * *"
+    timezone: UTC
+tasks:
+  - id: send
+    type: io.tranto.plugin.core.log.Log
+    message: "digest sent"

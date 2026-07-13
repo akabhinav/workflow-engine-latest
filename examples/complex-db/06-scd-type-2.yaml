@@ -1,0 +1,36 @@
+id: scd2
+namespace: data
+description: Slowly Changing Dimension (Type 2) — expire the old version, insert a new current one. Self-verifying.
+inputs:
+  - id: dbUrl
+    type: STRING
+    defaults: "jdbc:h2:mem:scd_demo;DB_CLOSE_DELAY=-1"
+tasks:
+  - id: setup
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: |
+      CREATE TABLE dim_customer(id INT AUTO_INCREMENT PRIMARY KEY, cust_key INT,
+        name VARCHAR(50), valid_to VARCHAR(10), current BOOLEAN);
+      INSERT INTO dim_customer(cust_key,name,valid_to,current) VALUES (100,'Ada Old','9999',TRUE)
+  - id: expire
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: "UPDATE dim_customer SET current=FALSE, valid_to='2026-07-05' WHERE cust_key=100 AND current=TRUE"
+  - id: insert_new
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: "INSERT INTO dim_customer(cust_key,name,valid_to,current) VALUES (100,'Ada New','9999',TRUE)"
+  - id: versions
+    type: io.tranto.plugin.core.jdbc.Query
+    url: "{{ inputs.dbUrl }}"
+    sql: "SELECT COUNT(*) FROM dim_customer WHERE cust_key=100"
+  - id: current_count
+    type: io.tranto.plugin.core.jdbc.Query
+    url: "{{ inputs.dbUrl }}"
+    sql: "SELECT COUNT(*) FROM dim_customer WHERE cust_key=100 AND current=TRUE"
+  - id: verify
+    type: io.tranto.plugin.core.execution.Assert
+    conditions:
+      - "{{ outputs.versions.firstValue == 2 }}"
+      - "{{ outputs.current_count.firstValue == 1 }}"

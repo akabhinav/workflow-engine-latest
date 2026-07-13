@@ -1,0 +1,19 @@
+id: feature_rollout
+namespace: platform
+description: Conditionally enable a feature (if / else).
+inputs:
+  - id: enabled
+    type: BOOLEAN
+    defaults: true
+tasks:
+  - id: decide
+    type: io.tranto.plugin.core.flow.If
+    condition: "{{ inputs.enabled }}"
+    then:
+      - id: turn_on
+        type: io.tranto.plugin.core.log.Log
+        message: "feature enabled for cohort"
+    else:
+      - id: keep_off
+        type: io.tranto.plugin.core.log.Log
+        message: "feature stays off"

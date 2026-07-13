@@ -1,0 +1,35 @@
+id: dq_gate
+namespace: data
+description: Run several data-quality checks (nulls / negatives / duplicates); fail the run if any breach.
+inputs:
+  - id: dbUrl
+    type: STRING
+    defaults: "jdbc:h2:mem:dq_demo;DB_CLOSE_DELAY=-1"
+tasks:
+  - id: setup
+    type: io.tranto.plugin.core.jdbc.Execute
+    url: "{{ inputs.dbUrl }}"
+    sql: |
+      CREATE TABLE metrics(id INT, val INT);
+      INSERT INTO metrics VALUES (1,10),(2,20),(3,30),(4,40)
+  - id: nulls
+    type: io.tranto.plugin.core.jdbc.Query
+    url: "{{ inputs.dbUrl }}"
+    sql: "SELECT COUNT(*) FROM metrics WHERE val IS NULL"
+  - id: negatives
+    type: io.tranto.plugin.core.jdbc.Query
+    url: "{{ inputs.dbUrl }}"
+    sql: "SELECT COUNT(*) FROM metrics WHERE val < 0"
+  - id: dups
+    type: io.tranto.plugin.core.jdbc.Query
+    url: "{{ inputs.dbUrl }}"
+    sql: "SELECT COUNT(*) FROM (SELECT id FROM metrics GROUP BY id HAVING COUNT(*) > 1) t"
+  - id: gate
+    type: io.tranto.plugin.core.execution.Assert
+    conditions:
+      - "{{ outputs.nulls.firstValue == 0 }}"
+      - "{{ outputs.negatives.firstValue == 0 }}"
+      - "{{ outputs.dups.firstValue == 0 }}"
+  - id: publish
+    type: io.tranto.plugin.core.log.Log
+    message: "all data-quality checks passed"

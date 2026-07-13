@@ -1,0 +1,14 @@
+id: singleton_job
+namespace: ops
+description: >
+  Only one run at a time (concurrency limit 1). A second run while this one is active is QUEUED until
+  a slot frees. Demonstrated by submitting two executions via the engine/API.
+concurrency:
+  limit: 1
+  behavior: QUEUE
+tasks:
+  - id: gate
+    type: io.tranto.plugin.core.flow.Pause
+  - id: work
+    type: io.tranto.plugin.core.log.Log
+    message: "running the singleton"

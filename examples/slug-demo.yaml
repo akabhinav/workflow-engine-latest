@@ -1,0 +1,17 @@
+id: slug_demo
+namespace: demo
+description: Uses the third-party com.acme.tranto.text.Slugify plugin loaded from --plugins.
+inputs:
+  - id: title
+    type: STRING
+    defaults: "Hello, World! Tranto 2026"
+outputs:
+  - id: slug
+    value: "{{ outputs.make_slug.slug }}"
+tasks:
+  - id: make_slug
+    type: com.acme.tranto.text.Slugify
+    text: "{{ inputs.title }}"
+  - id: show
+    type: io.tranto.plugin.core.log.Log
+    message: "slug is: {{ outputs.make_slug.slug }}"

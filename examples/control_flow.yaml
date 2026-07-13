@@ -1,0 +1,26 @@
+id: control_flow
+namespace: dev
+description: Shows parallel execution, branching, and assertions.
+tasks:
+  - id: in_parallel
+    type: io.tranto.plugin.core.flow.Parallel
+    tasks:
+      - id: greet
+        type: io.tranto.plugin.core.debug.Echo
+        format: "hello from a virtual thread"
+      - id: check
+        type: io.tranto.plugin.core.execution.Assert
+        conditions:
+          - "true"
+
+  - id: choose
+    type: io.tranto.plugin.core.flow.If
+    condition: "true"
+    then:
+      - id: taken
+        type: io.tranto.plugin.core.log.Log
+        message: "branch taken"
+    else:
+      - id: skipped
+        type: io.tranto.plugin.core.log.Log
+        message: "not reached"

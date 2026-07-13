@@ -1,0 +1,13 @@
+id: request_tracing
+namespace: platform
+description: Templating helpers — uuid(), now(), json() — for correlation ids and timestamps.
+tasks:
+  - id: stamp
+    type: io.tranto.plugin.core.output.OutputValues
+    values:
+      request_id: "{{ uuid() }}"
+      at: "{{ now() }}"
+      payload: "{{ json({'ok': true}) }}"
+  - id: log_it
+    type: io.tranto.plugin.core.log.Log
+    message: "traced {{ outputs.stamp.values.request_id }}"

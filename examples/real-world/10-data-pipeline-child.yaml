@@ -1,0 +1,7 @@
+id: enrich_child
+namespace: data
+description: The child flow called by 10-data-pipeline-parent via a Subflow task.
+tasks:
+  - id: enrich
+    type: io.tranto.plugin.core.log.Log
+    message: "enriching records"

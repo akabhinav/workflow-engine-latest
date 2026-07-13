@@ -1,0 +1,12 @@
+spring:
+  main:
+    web-application-type: none
+    banner-mode: "off"
+  threads:
+    virtual:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    io.tranto: INFO

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.tranto</groupId>
+        <artifactId>tranto</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!--
+      Tranto built-in plugins. Deliberately built against the SDK ONLY (scope provided), exactly
+      like the 500+ external plugins will be — this dogfoods the stability wall (docs/08): if our
+      own tasks compile without the engine, so will everyone else's.
+    -->
+    <artifactId>tranto-plugin-core</artifactId>
+    <name>Tranto :: Plugin Core (built-ins)</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.tranto</groupId>
+            <artifactId>tranto-plugin-sdk</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- @JsonProperty for YAML keys that are Java reserved words (e.g. 'else'). -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+              Run BOTH annotation processors: Lombok (getters/builders) and the Tranto plugin
+              processor (which writes META-INF/services/io.tranto.core.models.Plugin). Declaring
+              annotationProcessorPaths here overrides the parent's Lombok-only list, so we restate
+              Lombok alongside the Tranto processor.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths combine.self="override">
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>io.tranto</groupId>
+                            <artifactId>tranto-processor</artifactId>
+                            <version>${project.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,8 @@
+id: api_timeout
+namespace: integrations
+description: A slow partner call is capped by a timeout and fails fast.
+tasks:
+  - id: call_partner
+    type: io.tranto.plugin.core.flow.Sleep
+    duration: "PT5S"
+    timeout: "PT0.1S"

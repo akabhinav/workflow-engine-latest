@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.tranto</groupId>
+        <artifactId>tranto</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!--
+      Tranto Platform BOM.
+      A published Bill-of-Materials for EXTERNAL consumers (plugin authors, embedders)
+      so they can align on Tranto's dependency versions with a single <import>.
+      Internal modules inherit managed versions from the root parent directly.
+    -->
+    <artifactId>tranto-platform</artifactId>
+    <packaging>pom</packaging>
+    <name>Tranto :: Platform (BOM)</name>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Align external consumers with the same Spring Boot line -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Tranto modules, re-exported for external use -->
+            <dependency>
+                <groupId>io.tranto</groupId>
+                <artifactId>tranto-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

@@ -1,0 +1,11 @@
+id: batch_resize
+namespace: media
+description: One iteration per file (loop / forEach). Each sees {{ taskrun.value }}.
+tasks:
+  - id: each_file
+    type: io.tranto.plugin.core.flow.Loop
+    values: "avatar.png,banner.jpg,thumb.gif"
+    tasks:
+      - id: resize
+        type: io.tranto.plugin.core.log.Log
+        message: "resizing {{ taskrun.value }}"

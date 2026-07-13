@@ -1,0 +1,11 @@
+id: payment_retry
+namespace: billing
+description: A flaky charge retried with exponential backoff; ends FAILED once attempts are exhausted.
+tasks:
+  - id: charge
+    type: io.tranto.plugin.core.execution.Fail
+    message: "gateway timeout"
+    retry:
+      maxAttempts: 2
+      behavior: EXPONENTIAL
+      delay: "PT0.5S"

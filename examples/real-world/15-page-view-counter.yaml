@@ -1,0 +1,14 @@
+id: page_view_counter
+namespace: analytics
+description: Persist and read state through the namespace KV store within a run.
+tasks:
+  - id: seed
+    type: io.tranto.plugin.core.kv.Set
+    key: views
+    value: "1024"
+  - id: read
+    type: io.tranto.plugin.core.kv.Get
+    key: views
+  - id: show
+    type: io.tranto.plugin.core.log.Log
+    message: "views so far: {{ outputs.read.value }}"

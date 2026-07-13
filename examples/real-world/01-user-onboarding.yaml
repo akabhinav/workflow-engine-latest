@@ -1,0 +1,17 @@
+id: user_onboarding
+namespace: company.users
+description: Sequential onboarding pipeline driven by an input.
+inputs:
+  - id: email
+    type: STRING
+    defaults: ada@example.com
+tasks:
+  - id: validate
+    type: io.tranto.plugin.core.log.Log
+    message: "Validating {{ inputs.email }}"
+  - id: create_account
+    type: io.tranto.plugin.core.debug.Return
+    format: "account:{{ inputs.email }}"
+  - id: send_welcome
+    type: io.tranto.plugin.core.log.Log
+    message: "Welcome email sent to {{ inputs.email }}"

@@ -1,0 +1,15 @@
+id: conditional_release
+namespace: cicd
+description: Skip the deploy step unless we're on main (runIf). Pass branch=main to run it.
+inputs:
+  - id: branch
+    type: STRING
+    defaults: feature-x
+tasks:
+  - id: deploy
+    type: io.tranto.plugin.core.log.Log
+    message: "deploying"
+    runIf: "{{ inputs.branch == 'main' }}"
+  - id: done
+    type: io.tranto.plugin.core.log.Log
+    message: "pipeline complete"
